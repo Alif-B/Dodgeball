@@ -1,0 +1,211 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title> Break Game </title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <style>
+        #body {
+            background-color: black;
+        }
+
+        .divs {
+            height: 100vh;
+            width: 10vw;
+        }
+
+        #gameDiv {
+            width: 90vw;
+            margin: auto;
+        }
+
+        #court {
+            position: absolute;
+            width: 99%;
+            height: 100%;
+            top: 0%;
+            z-index: -10;
+        }
+
+        .aims {
+            position: relative;
+            background-color: greenyellow;
+            z-index: 1;
+            width: 20px;
+            height: 10px;
+            float: right;
+        }
+
+        @keyframes move_aim {
+            0%,
+            100% {
+                top: 4vh
+            }
+            50% {
+                top: 96vh
+            }
+        }
+
+        @keyframes move_ball {
+            0% {
+                top: var(--initial-top);
+                left: var(--initial-left);
+            }
+            50% {
+                top: var(--middle-top);
+                left: var(--middle-left);
+            }
+            100% {
+                top: var(--final-top);
+                left: var(--final-left);
+            }
+        }
+    </style>
+</head>
+
+
+<body id='body' onload="docReady()">
+
+    <div></div>
+    <img id='court' src='Images\court.png'>
+    <img id='player1' src="Images\player1Empty.png" style="position: absolute; left: 0; top:0;">
+    <img id='ball' src='Images\ball.png' height="50" width="50" style="z-index: -1;">
+    <div id='aim' class="aims"></div>
+    <div id='aim2' class="aims" style="float: left;"></div>
+    </div>
+
+    <!------------------------------------------------------- JavaScript --------------------------------------------------------->
+
+    <script>
+        // Global Variables
+        let player1 = document.getElementById('player1');
+        let ball = document.getElementById('ball');
+        let ball_in_hand = false;
+        let aim;
+        let aim1 = document.getElementById('aim');
+
+//---------------------------------------------Initial Positions of all objects-------------------------------------------
+        function ball_position() {
+            ball.style.position = 'absolute';
+            ball.style.top = '50px';
+            ball.style.left = (window.innerWidth / 2) - 25 + 'px';
+            aim1.style.top = '10px';
+        }
+//-------------------------------------------------Pickup the ball-------------------------------------------------------
+        function pick_up_ball() {
+            if (
+                parseInt(ball.style.left) < (parseInt(player1.style.left) + 190)
+                && parseInt(ball.style.top) > parseInt(player1.style.top)
+                && parseInt(ball.style.left) > parseInt(player1.style.left)
+                && parseInt(ball.style.top) + 50 < (parseInt(player1.style.top) + 240)
+            ) {
+                player1.src = "Images/player1.png";
+                ball.style.visibility = 'hidden';
+                ball_in_hand = true;
+                ball.style.animation = 'none';
+            }
+        }
+//-------------------------------------------------Throw the ball-------------------------------------------------------
+        function throw_ball() {
+            if (ball_in_hand) {
+                let final_width = (Math.random() * ((window.innerWidth / 2) - 25)) + 25;
+                let final_height = (Math.random() * ((window.innerHeight) - 75)) + 25;
+                let initial_height = player1.offsetTop - 115;
+                let initial_width = player1.offsetLeft + 110;
+
+                player1.src = "Images/player1Empty.png";
+
+                ball.style.visibility = "visible";
+                ball_in_hand = false;
+
+                aim1.style.animationPlayState = "paused";
+
+                move_ball(final_height, final_width);
+            }
+        }
+
+        function move_ball(height, width) {
+            ball.style.top = ((player1.offsetTop) + 100) + 'px';
+            ball.style.left = ((player1.offsetLeft) + 10) + 'px';
+            ball.style.zIndex = 11;
+
+            document.documentElement.style.setProperty('--initial-top', (ball.offsetTop + 'px'))
+            document.documentElement.style.setProperty('--initial-left', (ball.offsetLeft + 'px'))
+            document.documentElement.style.setProperty('--middle-top', (aim1.offsetTop - 25 + 'px'))
+            document.documentElement.style.setProperty('--middle-left', (aim1.offsetLeft - 25 + 'px'))
+            document.documentElement.style.setProperty('--final-top', (height + 'px'))
+            document.documentElement.style.setProperty('--final-left', (width - 25 + 'px'))
+            ball.style.animation = "move_ball 4s forwards";
+
+            ball.style.top = height + 'px';
+            ball.style.left = width - 25 + 'px';
+        }
+
+
+//-------------------------------------------------Aiming on the right side--------------------------------------------
+        function aim_ball() {
+            if (ball_in_hand) {
+                aim = aim1.style.animation = "move_aim 4s infinite";
+            }
+        }
+//-------------------------------------------------Moving the player-----------------------------------------------
+        function moveRight() {
+            if (parseInt(player1.style.left) < ((window.innerWidth / 2) - 170)) {
+                player1.style.left = parseInt(player1.style.left) + 10 + 'px';
+            }
+        }
+        function moveLeft() {
+            if (parseInt(player1.style.left) > 0) {
+                player1.style.left = parseInt(player1.style.left) - 10 + 'px';
+            }
+        }
+        function moveUp() {
+            if (parseInt(player1.style.top) > 0) {
+                player1.style.top = parseInt(player1.style.top) - 10 + 'px';
+            }
+        }
+        function moveDown() {
+            if (parseInt(player1.style.top) < ((window.innerHeight) - 233)) {
+                player1.style.top = parseInt(player1.style.top) + 10 + 'px';
+            }
+        }
+
+        function key_pressed() {
+            switch (event.keyCode) {
+                case 68:
+                    moveRight();
+                case 65:
+                    moveLeft();
+                case 87:
+                    moveUp();
+                case 83:
+                    moveDown();
+                case 32:
+                    aim_ball();
+            }
+            pick_up_ball()
+        }
+
+        function key_released() {
+            switch (event.keyCode) {
+                case 32:
+                    throw_ball();
+                    break;
+            }
+        }
+
+        //-------------------------------------------------Initial onload function calling-----------------------------------------------
+        function docReady() {
+            window.addEventListener('keydown', key_pressed);
+            window.addEventListener('keyup', key_released);
+            ball_position();
+        }
+    </script>
+</body>
+
+</html>
